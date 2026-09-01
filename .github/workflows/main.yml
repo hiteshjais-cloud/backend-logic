@@ -12,3 +12,10 @@ jobs:
           node-version: 20
       - run: npm install
       - run: npm test
+
+  build:
+    needs: test
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - run: docker build -t calculator-backend .
