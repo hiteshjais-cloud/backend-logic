@@ -1,7 +1,5 @@
 name: Backend
-
 on: [push]
-
 jobs:
   test:
     runs-on: ubuntu-latest
@@ -12,24 +10,24 @@ jobs:
           node-version: 20
       - run: npm install
       - run: npm test
-
+  
   build_and_deploy:
     needs: test
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-
+      
       - name: Configure AWS Credentials
         uses: aws-actions/configure-aws-credentials@v4
         with:
           aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           aws-region: ap-southeast-2
-
+      
       - name: Login to ECR
         id: ecr
         uses: aws-actions/amazon-ecr-login@v2
-
+      
       - name: Build and push
         env:
           REGISTRY: ${{ steps.ecr.outputs.registry }}
@@ -38,3 +36,19 @@ jobs:
           docker tag $REGISTRY/calculator-backend:$GITHUB_SHA $REGISTRY/calculator-backend:latest
           docker push $REGISTRY/calculator-backend:$GITHUB_SHA
           docker push $REGISTRY/calculator-backend:latest
+      
+      - name: Update ECS Task Definition
+        id: task-def
+        uses: aws-actions/amazon-ecs-render-task-definition@v1
+        with:
+          task-definition: task-definition.json
+          container-name: calculator-backend
+          image: ${{ steps.ecr.outputs.registry }}/calculator-backend:${{ github.sha }}
+      
+      - name: Deploy to ECS
+        uses: aws-actions/amazon-ecs-deploy-task-definition@v1
+        with:
+          task-definition: ${{ steps.task-def.outputs.task-definition }}
+          service: calculator-backend-service
+          cluster: your-cluster-name
+          wait-for-service-stability: true
