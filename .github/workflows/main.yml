@@ -50,5 +50,5 @@ jobs:
         with:
           task-definition: ${{ steps.task-def.outputs.task-definition }}
           service: calculator-backend-service
-          cluster: your-cluster-name
+          cluster: "calculater-backend" // your cluster name //
           wait-for-service-stability: true
