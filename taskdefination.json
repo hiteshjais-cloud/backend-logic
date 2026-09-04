@@ -1,0 +1,39 @@
+{
+  "family": "calculator-backend",
+  "networkMode": "bridge",
+  "requiresCompatibilities": ["EC2"],
+  "executionRoleArn": "arn:aws:iam::746931976879:role/ecsTaskExecutionRole",
+  "cpu": "256",
+  "memory": "400",
+  "containerDefinitions": [
+    {
+      "name": "calculater-backend",
+      "image": "746931976879.dkr.ecr.ap-southeast-2.amazonaws.com/calculater-backend:latest",
+      "essential": true,
+      "portMappings": [
+        {
+          "containerPort": 5000,
+          "hostPort": 0,
+          "protocol": "tcp"
+        }
+      ],
+      "environment": [
+        { "name": "PORT",           "value": "5000" },
+        { "name": "DB_HOST",        "value": ".ap-southeast-2.rds.amazonaws.com" },
+        { "name": "DB_PORT",        "value": "5432" },
+        { "name": "DB_USER",        "value": "calculater_app" },
+        { "name": "DB_NAME",        "value": "calculater_app" },
+        { "name": "DB_PASSWORD",    "value": "" },
+        { "name": "ALLOWED_ORIGIN", "value": "" }
+      ],
+      "logConfiguration": {
+        "logDriver": "awslogs",
+        "options": {
+          "awslogs-group": "/ecs/calculator-backend",
+          "awslogs-region": "ap-southeast-2",
+          "awslogs-stream-prefix": "ecs"
+        }
+      }
+    }
+  ]
+}
